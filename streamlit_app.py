@@ -4,11 +4,16 @@ import pandas as pd
 
 from streamlit_tags import st_tags, st_tags_sidebar
 
-from streamlit_option_menu import option_menu
+from functionforDownloadButtons import download_button
+import os
+import json
+
+import requests
 
 # imports for aggrid
 from st_aggrid import AgGrid
 from st_aggrid import AgGrid
+import pandas as pd
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import JsCode
 from st_aggrid import GridUpdateMode, DataReturnMode
@@ -34,6 +39,9 @@ st.write(
     "This app allows users to classify data on the fly in an unsupervised way, via Zero-Shot Learning and the DistilBERT model."
 )
 
+
+import streamlit as st
+from streamlit_option_menu import option_menu
 
 # 1. as sidebar menu
 with st.sidebar:
@@ -66,39 +74,29 @@ st.caption("")
 #     "I have a question for you or to you"
 #     "How to ask a question on amazon about a product"
 
-with st.expander("ℹ️ - To-do - Roadmap", expanded=False):
+with st.expander("Roadmap - To Do", expanded=False):
 
     st.write(
         """
  
--   MOST IMPORTANT - Mode code in "demo" to "full mode"
--   MOST IMPORTANT - Make sure it's deploying fine!
--   MOST IMPORTANT - Fix "ValueError: If using all scalar values, you must pass an index"
+-   P1 - Mode code in "demo" to "full mode"
+-   P1 - Make sure it's deploying fine!
+-   P1 - Fix "ValueError: If using all scalar values, you must pass an index"
 -   Change icons in sidebar menu
 -   Change MAX_LINES in API key section
 
  	    """
     )
+    st.markdown("")
 
-with st.expander("ℹ️ - To-do - Done", expanded=False):
+with st.expander("Roadmap - Done", expanded=False):
     st.write(
         """
--   MOST IMPORTANT - Widen layout doesn't work, ask Karen?
--   ValueError: If using all scalar values, you must pass an index
 -   SessionState tab 1 demo
 -   SessionState tab 2 own API key
 	    """
     )
 
-with st.expander("ℹ️ - About this app", expanded=False):
-    st.write(
-        """
--   The *BERT Keyword Extractor* app is an easy-to-use interface built in Streamlit for the amazing [KeyBERT](https://github.com/MaartenGr/KeyBERT) library from Maarten Grootendorst!
--   It uses a minimal keyword extraction technique that leverages multiple NLP embeddings and relies on [Transformers] (https://huggingface.co/transformers/) 🤗 to create keywords/keyphrases that are most similar to a document.
--   The tool is still in Beta. Any issues, feedback or suggestions: [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/DataChaz/BertKeywordExtractor)
--   This app is free. If it's useful to you, you can [buy me a ☕](https://www.buymeacoffee.com/cwar05) to support my work. 🙏
-	    """
-    )
     st.markdown("")
 
 
