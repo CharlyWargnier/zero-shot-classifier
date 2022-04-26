@@ -50,7 +50,7 @@ with st.sidebar:
         ["Demo", "Full unlocked version"],
         icons=["house", "gear"],
         menu_icon="cast",
-        default_index=1,
+        default_index=0,
     )
 
 st.caption("")
