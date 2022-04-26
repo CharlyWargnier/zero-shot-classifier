@@ -307,7 +307,6 @@ elif selected == "Full unlocked version":
         ####### WORKING #####################################
 
         # API_KEY = st.secrets["API_KEY"]
-        "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"
 
         API_KEY = st.text_input("Enter API key")
 
