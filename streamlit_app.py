@@ -33,7 +33,7 @@ st.set_page_config(layout=layout, page_title="Zero-Shot Text Classifier", page_i
 
 st.image(
     "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/325/balloon_1f388.png",
-    width=150,
+    width=130,
 )
 
 st.title("Zero-Shot Text Classifier")
@@ -72,8 +72,8 @@ st.sidebar.write(
     unsafe_allow_html=True,
 )
 
-st.sidebar.write("Debug info:  \n")
-st.sidebar.write("- Streamlit version", f"`{st.__version__}`")
+# st.sidebar.write("Debug info:  \n")
+# st.sidebar.write("- Streamlit version", f"`{st.__version__}`")
 
 st.checkbox(
     "Widen layout",
@@ -86,14 +86,19 @@ with st.expander("Roadmap - ToDo", expanded=False):
     st.write(
         """
 
--   P1 - Mode code in "demo" to "full mode"
--   Remove hashed comment
--   Change keyphrases as they are not great
--   Remove space in top header
--   Add # except ValueError: #     "ValueError" warning message when API key is not valid?
--   Add notes about datachaz
--   Add link to blog post
--   Add link to 30days
+
+-   Retry API key once Hugging Face has fixed the issue.
+-   Add a variable for cap limit
+-   Add session state to the table
+-   [P2] Add # except ValueError: #     "ValueError" warning message when API key is not valid?
+-   [P2] Remove space in top header
+-   [P2] Add notes about datachaz
+-   [P2] Add link to blog post
+-   [P2] Add link to 30days
+-   [P2] Add help tooltip for Enter API key
+-   [P2] Change message in show_spinner show_spinner
+-   [P2] Add a message when the model is being trained (it will take a minute)
+-   [P2] Reduce font size in navbar
 
  	    """
     )
@@ -104,11 +109,6 @@ with st.expander("Roadmap - Optional", expanded=False):
     st.write(
         """
 
--   Add link to streamlit.io
--   Add help tooltip for Enter API key
--   Change message in show_spinner show_spinner
--   Add a message when the model is being trained (it will take a minute)
--   Reduce font size in navbar
 
  	    """
     )
@@ -118,6 +118,9 @@ with st.expander("Roadmap - Done", expanded=False):
     st.write(
         """
 -   Add warning message when no labels are inputed
+-   Change keyphrases as they are not great
+-   P1 - Mode code in "demo" to "full mode"
+-   Remove hashed comment
 -   Change lenthg limit on full mode to 50
 -   P1 - Make sure it's deploying fine!
 -   Change icons in sidebar menu
@@ -170,20 +173,22 @@ if selected == "Demo":
             "I want to order clothes from this shop",
             "How to ask a question about a product",
             "Request a refund through the Google Play store",
-            "I have a question for you or to you",
+            "I have a question for you",
         ]
 
         sample = f"{new_line.join(map(str, nums))}"
 
         linesDeduped2 = []
-        
-        MAX_LINES = 10
+
+        MAX_LINES = 5
         text = st.text_area(
             "Enter keyphrase to classify",
             sample,
             height=200,
             key="2",
-            help="At least two keyphrases for the classifier to work, One per line, 10 keyphrases max as part of the demo",
+            help="At least two keyphrases for the classifier to work, one per line, "
+            + str(MAX_LINES)
+            + " keyphrases max as part of the demo",
         )
         lines = text.split("\n")  # A list of lines
         linesList = []
@@ -193,11 +198,14 @@ if selected == "Demo":
         linesList = list(filter(None, linesList))  # Remove empty
 
         if len(linesList) > MAX_LINES:
+
             st.info(
-                f"🚨 Only the first 10 keyprases will be reviewed. Unlock that limit by adding your HuggingFace your API key - See left side-bar"
+                f"🚨 Only the first "
+                + str(MAX_LINES)
+                + " keyprases will be reviewed. Unlock that limit by switching to 'Unlocked Mode'"
             )
 
-            linesList = linesList[:MAX_LINES]
+        linesList = linesList[:MAX_LINES]
 
         submit_button = st.form_submit_button(label="Submit")
 
@@ -214,9 +222,6 @@ if selected == "Demo":
 
     else:
 
-        # @st.experimental_singleton
-        # @st.experimental_memo
-        # @st.cache(show_spinner=True, allow_output_mutation=True)
         def query(payload):
             response = requests.post(API_URL, headers=headers, json=payload)
             # Unhash to check status codes from the API response
@@ -296,7 +301,6 @@ elif selected == "Unlocked Mode":
         )
 
         headers = {"Authorization": f"Bearer {API_KEY2}"}
-        # headers = {"Authorization": f"Bearer {API_KEY}"}
 
         multiselectComponent = st_tags(
             label="",
@@ -319,20 +323,24 @@ elif selected == "Unlocked Mode":
             "I want to order clothes from this shop",
             "How to ask a question about a product",
             "Request a refund through the Google Play store",
-            "I have a question for you or to you",
+            "I have a question for you",
         ]
 
         sample = f"{new_line.join(map(str, nums))}"
 
         linesDeduped2 = []
-        MAX_LINES = 10
+
+        MAX_LINES_FULL = 50
         text = st.text_area(
             "Enter keyphrase to classify",
             sample,
             height=200,
             key="2",
-            help="At least two keyphrases for the classifier to work, One per line, 10 keyphrases max as part of the demo",
+            help="At least two keyphrases for the classifier to work, one per line, "
+            + str(MAX_LINES_FULL)
+            + " keyphrases max in 'unlocked mode'. You can tweak 'MAX_LINES_FULL' in the code to change this",
         )
+
         lines = text.split("\n")  # A list of lines
         linesList = []
         for x in lines:
@@ -340,12 +348,14 @@ elif selected == "Unlocked Mode":
         linesList = list(dict.fromkeys(linesList))  # Remove dupes
         linesList = list(filter(None, linesList))  # Remove empty
 
-        if len(linesList) > MAX_LINES:
+        if len(linesList) > MAX_LINES_FULL:
             st.info(
-                f"🚨 Only the first 10 keyprases will be reviewed. Unlock that limit by adding your HuggingFace API key - See left side-bar"
+                f"🚨 Only the first "
+                + str(MAX_LINES_FULL)
+                + " keyprases are reviewed. Tweak 'MAX_LINES_FULL' in the code to change this"
             )
 
-            linesList = linesList[:MAX_LINES]
+            linesList = linesList[:MAX_LINES_FULL]
 
         submit_button = st.form_submit_button(label="Submit")
 
@@ -362,9 +372,6 @@ elif selected == "Unlocked Mode":
 
     else:
 
-        # @st.experimental_singleton
-        # @st.experimental_memo
-        # @st.cache(show_spinner=True, allow_output_mutation=True)
         def query(payload):
             response = requests.post(API_URL, headers=headers, json=payload)
             # Unhash to check status codes from the API response
@@ -432,8 +439,6 @@ elif selected == "Unlocked Mode":
             fit_columns_on_grid_load=False,
             configure_side_bar=True,
         )
-
-
 
 if __name__ == "__main__":
     main()
