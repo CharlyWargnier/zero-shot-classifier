@@ -94,8 +94,8 @@ with st.expander("Roadmap - ToDo", expanded=False):
     st.write(
         """
 
--   P1 - Make sure it's deploying fine!
 -   P1 - Mode code in "demo" to "full mode"
+-   Remove hashed comment
 -   Change keyphrases as they are not great
 -   Remove space in top header
 -   Add warning message when API key is not valid?
@@ -113,6 +113,8 @@ with st.expander("Roadmap - Optional", expanded=False):
         """
 
 -   Add link to streamlit.io
+-   Change message in show_spinner show_spinner
+-   Add a message when the model is being trained (it will take a minute)
 -   Reduce font size in navbar
 
  	    """
@@ -123,6 +125,7 @@ with st.expander("Roadmap - Done", expanded=False):
     st.write(
         """
 -   Add warning message when no labels are inputed
+-   P1 - Make sure it's deploying fine!
 -   Change icons in sidebar menu
 -   Move keyboards shortcuts class to a separate file
 -   Change MAX_LINES in API key section (atm fixed at 10)
@@ -157,9 +160,11 @@ if selected == "Demo":
 
     headers = {"Authorization": f"Bearer {API_KEY}"}
 
-    def query(payload):
-        response = requests.post(API_URL, headers=headers, json=payload)
-        return response.json()
+    # @st.experimental_memo(ttl=600)
+    # @st.cache(show_spinner=True, allow_output_mutation=True)
+    # def query(payload):
+    #     response = requests.post(API_URL, headers=headers, json=payload)
+    #     return response.json()
 
     # endregion Streamlit_API_KEY
 
@@ -167,8 +172,8 @@ if selected == "Demo":
 
         multiselectComponent = st_tags(
             label="",
-            text="Add your classifier labels here",
-            value=["Navigational", "Transactional", "Informational"],
+            text="Add labels - 3 max",
+            value=["Transactional", "Informational"],
             suggestions=[
                 "Navigational",
                 "Transactional",
@@ -182,10 +187,10 @@ if selected == "Demo":
 
         new_line = "\n"
         nums = [
-            "I want to buy something but don't know what",
-            "I want to order clothes from jumia",
-            "How to ask a question on amazon about a product",
-            "Request a refund through google play store",
+            "I want to buy something but I don't know what",
+            "I want to order clothes from this shop",
+            "How to ask a question about a product",
+            "Request a refund through the Google Play store",
             "I have a question for you or to you",
         ]
 
@@ -219,19 +224,21 @@ if selected == "Demo":
 
     if not submit_button:
         st.stop()
-    elif not multiselectComponent:
-        st.warning(
-            "You have not added any labels, ."
-        )
+
+    elif submit_button and not multiselectComponent:
+        st.warning("You have not added any labels, please add some! ")
         st.stop()
 
-    elif len(multiselectComponent) == 1:
-        st.warning(
-            "please make sure to add at least two labels for classification"
-        )
+    elif submit_button and len(multiselectComponent) == 1:
+        st.warning("Please make sure to add at least two labels for classification")
         st.stop()
+
     else:
 
+        # @st.experimental_memo(ttl=600)
+        # @st.experimental_singleton
+        # @st.experimental_memo
+        # @st.cache(show_spinner=True, allow_output_mutation=True)
         def query(payload):
             response = requests.post(API_URL, headers=headers, json=payload)
             # Unhash to check status codes from the API response
@@ -243,6 +250,12 @@ if selected == "Demo":
         listToAppend = []
 
         # You can find the list of parameters for HuggingFace API inference here -> https://huggingface.co/docs/api-inference/detailed_parameters
+
+        # import time
+
+        # with st.spinner("Fetching results. It may take a while!"):
+        #     time.sleep(5)
+        #     st.success("✅ Done!")
 
         for row in linesList:
             output2 = query(
@@ -256,6 +269,8 @@ if selected == "Demo":
             listToAppend.append(output2)
 
             df = pd.DataFrame.from_dict(output2)
+
+        st.success("✅ Done!")
 
         df = pd.DataFrame.from_dict(listToAppend)
 
@@ -275,15 +290,11 @@ if selected == "Demo":
             st.caption("")
 
             st.download_button(
-                label="Download table as CSV",
+                label="Download results as CSV",
                 data=csv,
-                file_name="large_df.csv",
+                file_name="results.csv",
                 mime="text/csv",
             )
-
-            # CSVButton2 = download_button(df, "Data.csv", "🎁 Download (.csv)")
-
-        # st.table(df)
 
         ##############################
 
@@ -303,10 +314,10 @@ if selected == "Demo":
         # # display df
         # dfNew
 
-        df = df.reset_index().rename(
-            columns={"sequence": "keyphrase", "scores": "label scores"}
-        )
-
+        # df = df.reset_index().rename(
+        #     columns={"sequence": "keyphrase", "scores": "label scores"}
+        # )
+        
         gb = GridOptionsBuilder.from_dataframe(df)
         # enables pivoting on all columns, however i'd need to change ag grid to allow export of pivoted/grouped data, however it select/filters groups
         gb.configure_default_column(
@@ -326,7 +337,6 @@ if selected == "Demo":
             fit_columns_on_grid_load=False,
             configure_side_bar=True,
         )
-
 
 # endregion Demo with Streamlit API key
 
