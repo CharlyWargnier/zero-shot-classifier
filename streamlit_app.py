@@ -1,16 +1,16 @@
 import streamlit as st
-import requests
 import pandas as pd
 
+# Import for navbar
+from streamlit_option_menu import option_menu
+
+# Import for dyanmic tagging
 from streamlit_tags import st_tags, st_tags_sidebar
 
-# from functionforDownloadButtons import download_button
-import os
-import json
+# Import for keyboard shortcuts
+# import streamlit.components.v1 as components
 
-import requests
-
-# imports for aggrid
+# Imports for aggrid
 from st_aggrid import AgGrid
 from st_aggrid import AgGrid
 import pandas as pd
@@ -18,7 +18,13 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import JsCode
 from st_aggrid import GridUpdateMode, DataReturnMode
 
-# region Format
+# Import for API calls
+import requests
+
+from dashboard_utils.gui import keyboard_to_url
+from dashboard_utils.gui import load_keyboard_class
+
+#######################################################
 
 # The code below is for the layout of the page
 if "widen" not in st.session_state:
@@ -36,54 +42,78 @@ st.image(
 st.title("Zero-Shot Text Classifier")
 
 st.write(
-    "This app allows users to classify data on the fly in an unsupervised way, via Zero-Shot Learning and the DistilBERT model."
+    "This app allows users to classify data on the fly in an unsupervised way, via Zero-Shot Learning and the DistilBART model."
 )
 
-
-import streamlit as st
-from streamlit_option_menu import option_menu
-
-# 1. as sidebar menu
 with st.sidebar:
     selected = option_menu(
-        "Main Menu",
-        ["Demo", "Full unlocked version"],
-        icons=["house", "gear"],
-        menu_icon="cast",
+        "",
+        ["Demo", "Unlocked Mode"],
+        icons=["bi-joystick", "bi-key-fill"],
+        menu_icon="",
         default_index=0,
     )
 
-st.caption("")
+#######################################
+
+keyboard_to_url(
+    key="g",
+    url="https://github.com/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
+)
+keyboard_to_url(
+    key_code=190,
+    url="https://github.dev/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
+)
+
+load_keyboard_class()
+st.sidebar.write("Shortcuts:")
+st.sidebar.write(
+    '<span class="kbdx">G</span>  &nbsp; GitHub',
+    unsafe_allow_html=True,
+)
+
+st.sidebar.write(
+    '<span class="kbdx">&thinsp;.&thinsp;</span>  &nbsp; GitHub Dev (VS Code)',
+    unsafe_allow_html=True,
+)
+
+st.sidebar.write("Debug info:  \n")
+st.sidebar.write("- Streamlit version", f"`{st.__version__}`")
+
+#######################################################
+
 st.checkbox(
     "Widen layout",
     key="widen",
     help="Tick this box to change the layout to 'wide' mode",
 )
-st.caption("")
 
-# endregion format
 
-# st.warning("Call API_URL (line 138) in secrets")
-
-# with st.expander("Examples", expanded=False):
-#     "Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!"
-#     "I want to buy something but don't know what"
-#     "I want to order clothes from jumia"
-#     "Request a refund through google play store"
-#     "I want a refund on my amazon prime"
-#     "I have a question for you or to you"
-#     "How to ask a question on amazon about a product"
-
-with st.expander("Roadmap - To Do", expanded=False):
+with st.expander("Roadmap - ToDo", expanded=False):
 
     st.write(
         """
- 
--   P1 - Mode code in "demo" to "full mode"
+
 -   P1 - Make sure it's deploying fine!
--   P1 - Fix "ValueError: If using all scalar values, you must pass an index"
--   Change icons in sidebar menu
--   Change MAX_LINES in API key section
+-   P1 - Mode code in "demo" to "full mode"
+-   Change keyphrases as they are not great
+-   Remove space in top header
+-   Add warning message when API key is not valid?
+-   Add notes about datachaz
+-   Add link to blog post
+-   Add link to 30days
+
+ 	    """
+    )
+    st.markdown("")
+
+with st.expander("Roadmap - Optional", expanded=False):
+
+    st.write(
+        """
+
+-   Add link to streamlit.io
+-   Reduce font size in navbar
 
  	    """
     )
@@ -92,6 +122,12 @@ with st.expander("Roadmap - To Do", expanded=False):
 with st.expander("Roadmap - Done", expanded=False):
     st.write(
         """
+-   Add warning message when no labels are inputed
+-   Change icons in sidebar menu
+-   Move keyboards shortcuts class to a separate file
+-   Change MAX_LINES in API key section (atm fixed at 10)
+-   P1 - Fix "ValueError: If using all scalar values, you must pass an index"
+-   Change github.dev links to the correct repo
 -   SessionState tab 1 demo
 -   SessionState tab 2 own API key
 	    """
@@ -106,30 +142,6 @@ def main():
     #    "👾 Zero-Shot Demo": demo,
     #    "🔑 Unlock with your API key": No_demo_API_key,
     # }
-
-
-#
-# if "page" not in st.session_state:
-#    st.session_state.update(
-#        {
-#            # Default page
-#            "page": "Home",
-#            # Radio, selectbox and multiselect options
-#            "options": ["Hello", "Everyone", "Happy", "Streamlit-ing"],
-#            # Default widget values
-#            "text": "",
-#            "slider": 0,
-#            "checkbox": False,
-#            "radio": "Hello",
-#            "selectbox": "Hello",
-#            "multiselect": ["Hello", "Everyone"],
-#        }
-#    )
-#
-# with st.sidebar:
-#    page = st.radio("Select your page", tuple(pages.keys()))
-#
-# pages[page]()
 
 
 # region Demo with Streamlit API key
@@ -157,8 +169,15 @@ if selected == "Demo":
             label="",
             text="Add your classifier labels here",
             value=["Navigational", "Transactional", "Informational"],
-            suggestions=["Navigational", "Transactional", "Informational"],
-            maxtags=5,
+            suggestions=[
+                "Navigational",
+                "Transactional",
+                "Informational",
+                "Positive",
+                "Negative",
+                "Neutral",
+            ],
+            maxtags=3,
         )
 
         new_line = "\n"
@@ -174,12 +193,13 @@ if selected == "Demo":
 
         # st.caption("Enter keyword or keyphrase - One per line - 5 lines max")
         linesDeduped2 = []
-        MAX_LINES = 5
+        MAX_LINES = 10
         text = st.text_area(
-            "Enter keyword or keyphrase - One per line - 5 lines max",
+            "Enter keyphrase to classify",
             sample,
             height=200,
             key="2",
+            help="At least two keyphrases for the classifier to work, One per line, 10 keyphrases max as part of the demo",
         )
         lines = text.split("\n")  # A list of lines
         linesList = []
@@ -190,7 +210,7 @@ if selected == "Demo":
 
         if len(linesList) > MAX_LINES:
             st.info(
-                f"🚨 Only the first 5 lines will be reviewed. Unlock that limit by adding your HuggingFace your API key - See left side-bar"
+                f"🚨 Only the first 10 keyprases will be reviewed. Unlock that limit by adding your HuggingFace your API key - See left side-bar"
             )
 
             linesList = linesList[:MAX_LINES]
@@ -199,24 +219,37 @@ if selected == "Demo":
 
     if not submit_button:
         st.stop()
+    elif not multiselectComponent:
+        st.warning(
+            "You have not added any labels, ."
+        )
+        st.stop()
+
+    elif len(multiselectComponent) == 1:
+        st.warning(
+            "please make sure to add at least two labels for classification"
+        )
+        st.stop()
     else:
 
         def query(payload):
             response = requests.post(API_URL, headers=headers, json=payload)
+            # Unhash to check status codes from the API response
+            # st.write(response.status_code)
             return response.json()
 
         listtest = ["I want a refund", "I have a question"]
 
         listToAppend = []
 
+        # You can find the list of parameters for HuggingFace API inference here -> https://huggingface.co/docs/api-inference/detailed_parameters
+
         for row in linesList:
             output2 = query(
                 {
-                    # "inputs": "Hi, I recently bought a device from your company but it is not working as advertised and I would like to get reimbursed!",
                     "inputs": row,
-                    # "parameters": {"candidate_labels": ["refund", "legal", "faq"]},
-                    # "parameters": {"candidate_labels": multiselect},
                     "parameters": {"candidate_labels": multiselectComponent},
+                    "options": {"wait_for_model": True},
                 }
             )
 
