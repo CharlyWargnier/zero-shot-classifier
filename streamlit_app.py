@@ -86,10 +86,8 @@ with st.expander("Roadmap - ToDo", expanded=False):
     st.write(
         """
 
-
 -   Retry API key once Hugging Face has fixed the issue.
--   Add a variable for cap limit
--   Add session state to the table
+-   Add session state to allow for interactivity with the table
 -   [P2] Add # except ValueError: #     "ValueError" warning message when API key is not valid?
 -   [P2] Remove space in top header
 -   [P2] Add notes about datachaz
@@ -118,6 +116,7 @@ with st.expander("Roadmap - Done", expanded=False):
     st.write(
         """
 -   Add warning message when no labels are inputed
+-   Add a variable for cap limit
 -   Change keyphrases as they are not great
 -   P1 - Mode code in "demo" to "full mode"
 -   Remove hashed comment
