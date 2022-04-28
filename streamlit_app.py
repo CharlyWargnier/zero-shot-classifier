@@ -230,6 +230,7 @@ if selected == "Demo":
 
     elif submit_button and not text:
         st.warning("NO CONTENT!!!!!")
+        st.session_state.valid_inputs_received = False
         st.stop()
 
 
