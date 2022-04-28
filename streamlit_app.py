@@ -31,6 +31,17 @@ else:
 
 st.set_page_config(layout=layout, page_title="Zero-Shot Text Classifier", page_icon="🤗")
 
+keyboard_to_url(
+    key="g",
+    url="https://github.com/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
+)
+keyboard_to_url(
+    key_code=190,
+    url="https://github.dev/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
+)
+
+load_keyboard_class()
+
 # Set up session state so app interactions don't reset the app
 
 if not "valid_inputs_received" in st.session_state:
@@ -57,6 +68,9 @@ st.write(
     "This app allows users to classify data on the fly in an unsupervised way, via Zero-Shot Learning and the DistilBART model."
 )
 
+st.write("")
+st.sidebar.write("")
+
 with st.sidebar:
     selected = option_menu(
         "",
@@ -66,16 +80,6 @@ with st.sidebar:
         default_index=0,
     )
 
-keyboard_to_url(
-    key="g",
-    url="https://github.com/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
-)
-keyboard_to_url(
-    key_code=190,
-    url="https://github.dev/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
-)
-
-load_keyboard_class()
 # st.sidebar.write("Shortcuts:")
 st.sidebar.header("Shortcuts")
 st.sidebar.write(
@@ -119,68 +123,6 @@ st.checkbox(
     key="widen",
     help="Tick this box to change the layout to 'wide' mode",
 )
-
-with st.expander("Roadmap - ToDo", expanded=False):
-
-    st.write(
-        """
-
--   Add "ValueError" warning message when API key is not valid?
--   Check API cap limit for both pages
--   Remove To-dos
--   Remove hashed comments
--   Add markdown link in top paragraph
--   Remove space in top header
--   Add notes about datachaz
-
- 	    """
-    )
-    st.markdown("")
-
-with st.expander("Roadmap - Discard?", expanded=False):
-
-    st.write(
-        """
-
--   Add help tooltip for Enter API key
--   Change message in show_spinner show_spinner
--   Add a message when the model is being trained (it will take a minute)
--   Reduce font size in navbar
-
- 	    """
-    )
-    st.markdown("")
-
-with st.expander("Roadmap - Done", expanded=False):
-    st.write(
-        """
-
--   Add Markdown line in the sidebar
--   Change logo
--   Add content from 30days of streamlit from corp repo
--   Add link to 30days
--   [P1] Add session state to the unlocked mode
--   Add a variable for cap limit
--   [P2] Add link to blog post
--   Retry API key once Hugging Face has fixed the issue.
--   Add session state to allow for interactivity with the table
--   Add warning message when no labels are inputed
--   Change keyphrases as they are not great
--   P1 - Mode code in "demo" to "full mode"
--   Remove hashed comment
--   Change lenthg limit on full mode to 50
--   P1 - Make sure it's deploying fine!
--   Change icons in sidebar menu
--   Move keyboards shortcuts class to a separate file
--   Change MAX_LINES in API key section (atm fixed at 10)
--   P1 - Fix "ValueError: If using all scalar values, you must pass an index"
--   Change github.dev links to the correct repo
--   SessionState tab 1 demo
--   SessionState tab 2 own API key
-	    """
-    )
-
-    st.markdown("")
 
 
 def main():
@@ -510,3 +452,65 @@ elif selected == "Unlocked Mode":
 
 if __name__ == "__main__":
     main()
+
+with st.expander("Roadmap - ToDo", expanded=False):
+
+    st.write(
+        """
+
+-   Add "ValueError" warning message when API key is not valid?
+-   Check API cap limit for both pages
+-   Remove To-dos
+-   Remove hashed comments
+-   Add markdown link in top paragraph
+-   Add notes about datachaz
+
+ 	    """
+    )
+    st.markdown("")
+
+with st.expander("Roadmap - Discard?", expanded=False):
+
+    st.write(
+        """
+
+-   Add help tooltip for Enter API key
+-   Change message in show_spinner show_spinner
+-   Add a message when the model is being trained (it will take a minute)
+-   Reduce font size in navbar
+
+ 	    """
+    )
+    st.markdown("")
+
+with st.expander("Roadmap - Done", expanded=False):
+    st.write(
+        """
+
+-   Remove space in top header
+-   Add Markdown line in the sidebar
+-   Change logo
+-   Add content from 30days of streamlit from corp repo
+-   Add link to 30days
+-   [P1] Add session state to the unlocked mode
+-   Add a variable for cap limit
+-   [P2] Add link to blog post
+-   Retry API key once Hugging Face has fixed the issue.
+-   Add session state to allow for interactivity with the table
+-   Add warning message when no labels are inputed
+-   Change keyphrases as they are not great
+-   P1 - Mode code in "demo" to "full mode"
+-   Remove hashed comment
+-   Change lenthg limit on full mode to 50
+-   P1 - Make sure it's deploying fine!
+-   Change icons in sidebar menu
+-   Move keyboards shortcuts class to a separate file
+-   Change MAX_LINES in API key section (atm fixed at 10)
+-   P1 - Fix "ValueError: If using all scalar values, you must pass an index"
+-   Change github.dev links to the correct repo
+-   SessionState tab 1 demo
+-   SessionState tab 2 own API key
+	    """
+    )
+
+    st.markdown("")
