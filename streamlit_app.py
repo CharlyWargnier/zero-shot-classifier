@@ -31,16 +31,24 @@ else:
 
 st.set_page_config(layout=layout, page_title="Zero-Shot Text Classifier", page_icon="🤗")
 
-#######################################################
+# Set up session state so app interactions don't reset the app
 
-if not 'valid_inputs_received' in st.session_state:
-    st.session_state['valid_inputs_received'] = False
+if not "valid_inputs_received" in st.session_state:
+    st.session_state["valid_inputs_received"] = False
 
-#######################################################
+# st.image(
+#     "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/325/balloon_1f388.png",
+#     width=130,
+# )
 
 st.image(
-    "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/325/balloon_1f388.png",
-    width=130,
+    # "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/325/balloon_1f388.png",
+    "logo.png",
+    width=160,
+)
+
+st.sidebar.image(
+    "30days_logo.jpeg",
 )
 
 st.title("Zero-Shot Text Classifier")
@@ -68,7 +76,8 @@ keyboard_to_url(
 )
 
 load_keyboard_class()
-st.sidebar.write("Shortcuts:")
+# st.sidebar.write("Shortcuts:")
+st.sidebar.header("Shortcuts")
 st.sidebar.write(
     '<span class="kbdx">G</span>  &nbsp; GitHub',
     unsafe_allow_html=True,
@@ -77,6 +86,29 @@ st.sidebar.write(
 st.sidebar.write(
     '<span class="kbdx">&thinsp;.&thinsp;</span>  &nbsp; GitHub Dev (VS Code)',
     unsafe_allow_html=True,
+)
+
+st.sidebar.markdown("---")
+
+# Sidebar
+st.sidebar.header("About")
+st.sidebar.markdown(
+    "[Streamlit](https://streamlit.io) is a Python library that allows the creation of interactive, data-driven web applications in Python."
+)
+
+st.sidebar.header("Resources")
+st.sidebar.markdown(
+    """
+- [Streamlit Documentation](https://docs.streamlit.io/)
+- [Cheat sheet](https://docs.streamlit.io/library/cheatsheet)
+- [Book](https://www.amazon.com/dp/180056550X) (Getting Started with Streamlit for Data Science)
+- [Blog](https://blog.streamlit.io/how-to-master-streamlit-for-data-science/) (How to master Streamlit for data science)
+"""
+)
+
+st.sidebar.header("Deploy")
+st.sidebar.markdown(
+    "You can quickly deploy Streamlit apps using [Streamlit Cloud](https://streamlit.io/cloud) in just a few clicks."
 )
 
 # st.sidebar.write("Debug info:  \n")
@@ -93,27 +125,27 @@ with st.expander("Roadmap - ToDo", expanded=False):
     st.write(
         """
 
--   Retry API key once Hugging Face has fixed the issue.
--   Add session state to allow for interactivity with the table
--   [P2] Add # except ValueError: #     "ValueError" warning message when API key is not valid?
--   [P2] Remove space in top header
--   [P2] Add notes about datachaz
--   [P2] Add link to blog post
--   [P2] Add link to 30days
--   [P2] Add help tooltip for Enter API key
--   [P2] Change message in show_spinner show_spinner
--   [P2] Add a message when the model is being trained (it will take a minute)
--   [P2] Reduce font size in navbar
+-   Add "ValueError" warning message when API key is not valid?
+-   Check API cap limit for both pages
+-   Remove To-dos
+-   Remove hashed comments
+-   Add markdown link in top paragraph
+-   Remove space in top header
+-   Add notes about datachaz
 
  	    """
     )
     st.markdown("")
 
-with st.expander("Roadmap - Optional", expanded=False):
+with st.expander("Roadmap - Discard?", expanded=False):
 
     st.write(
         """
 
+-   Add help tooltip for Enter API key
+-   Change message in show_spinner show_spinner
+-   Add a message when the model is being trained (it will take a minute)
+-   Reduce font size in navbar
 
  	    """
     )
@@ -122,8 +154,17 @@ with st.expander("Roadmap - Optional", expanded=False):
 with st.expander("Roadmap - Done", expanded=False):
     st.write(
         """
--   Add warning message when no labels are inputed
+
+-   Add Markdown line in the sidebar
+-   Change logo
+-   Add content from 30days of streamlit from corp repo
+-   Add link to 30days
+-   [P1] Add session state to the unlocked mode
 -   Add a variable for cap limit
+-   [P2] Add link to blog post
+-   Retry API key once Hugging Face has fixed the issue.
+-   Add session state to allow for interactivity with the table
+-   Add warning message when no labels are inputed
 -   Change keyphrases as they are not great
 -   P1 - Mode code in "demo" to "full mode"
 -   Remove hashed comment
@@ -206,7 +247,7 @@ if selected == "Demo":
         if len(linesList) > MAX_LINES:
 
             st.info(
-                f"🚨 Only the first "
+                f"❄️  Only the first "
                 + str(MAX_LINES)
                 + " keyprases will be reviewed. Unlock that limit by switching to 'Unlocked Mode'"
             )
@@ -215,23 +256,21 @@ if selected == "Demo":
 
         submit_button = st.form_submit_button(label="Submit")
 
-
     if not submit_button and not st.session_state.valid_inputs_received:
         st.stop()
 
     elif submit_button and not text:
-        st.warning("NO CONTENT!!!!!")
+        st.warning("❄️ There is no keyphrases to classify")
         st.session_state.valid_inputs_received = False
         st.stop()
 
-
     elif submit_button and not multiselectComponent:
-        st.warning("You have not added any labels, please add some! ")
+        st.warning("❄️ You have not added any labels, please add some! ")
         st.session_state.valid_inputs_received = False
         st.stop()
 
     elif submit_button and len(multiselectComponent) == 1:
-        st.warning("Please make sure to add at least two labels for classification")
+        st.warning("❄️ Please make sure to add at least two labels for classification")
         st.session_state.valid_inputs_received = False
         st.stop()
 
@@ -368,7 +407,7 @@ elif selected == "Unlocked Mode":
 
         if len(linesList) > MAX_LINES_FULL:
             st.info(
-                f"🚨 Only the first "
+                f"❄️ Only the first "
                 + str(MAX_LINES_FULL)
                 + " keyprases are reviewed. Tweak 'MAX_LINES_FULL' in the code to change this"
             )
@@ -377,18 +416,29 @@ elif selected == "Unlocked Mode":
 
         submit_button = st.form_submit_button(label="Submit")
 
-    if not submit_button:
+    if not submit_button and not st.session_state.valid_inputs_received:
+        st.stop()
+
+    elif submit_button and not text:
+        st.warning("❄️ There is no keyphrases to classify")
+        st.session_state.valid_inputs_received = False
         st.stop()
 
     elif submit_button and not multiselectComponent:
-        st.warning("You have not added any labels, please add some! ")
+        st.warning("❄️ You have not added any labels, please add some! ")
+        st.session_state.valid_inputs_received = False
         st.stop()
 
     elif submit_button and len(multiselectComponent) == 1:
-        st.warning("Please make sure to add at least two labels for classification")
+        st.warning("❄️ Please make sure to add at least two labels for classification")
+        st.session_state.valid_inputs_received = False
         st.stop()
 
-    else:
+    elif submit_button or st.session_state.valid_inputs_received:
+
+        if submit_button:
+
+            st.session_state.valid_inputs_received = True
 
         def query(payload):
             response = requests.post(API_URL, headers=headers, json=payload)
