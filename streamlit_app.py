@@ -31,6 +31,18 @@ else:
 
 st.set_page_config(layout=layout, page_title="Zero-Shot Text Classifier", page_icon="🤗")
 
+#######################################################
+
+if not 'valid_inputs_received` in st.session_state:
+    st.session_state['valid_inputs_received'] = False
+
+
+
+###################################
+
+
+
+
 st.image(
     "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/325/balloon_1f388.png",
     width=130,
@@ -41,6 +53,10 @@ st.title("Zero-Shot Text Classifier")
 st.write(
     "This app allows users to classify data on the fly in an unsupervised way, via Zero-Shot Learning and the DistilBART model."
 )
+
+
+
+
 
 with st.sidebar:
     selected = option_menu(
@@ -208,6 +224,7 @@ if selected == "Demo":
 
         submit_button = st.form_submit_button(label="Submit")
 
+
     if not submit_button:
         st.stop()
 
@@ -219,7 +236,10 @@ if selected == "Demo":
         st.warning("Please make sure to add at least two labels for classification")
         st.stop()
 
-    else:
+    elif submit_button or st.session_state.valid_inputs_received:
+
+        if submit_button:
+            st.session_state.valid_inputs_received = True
 
         def query(payload):
             response = requests.post(API_URL, headers=headers, json=payload)
