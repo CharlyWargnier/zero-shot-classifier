@@ -239,6 +239,11 @@ if selected == "Demo":
             help="Tick this box to change the layout to 'wide' mode",
         )
 
+        f = [[f"{x:.2%}" for x in row] for row in df["scores"]]
+        df["classification scores"] = f
+        df.drop("scores", inplace=True, axis=1)
+        df.rename(columns={"sequence": "keyphrase"}, inplace=True)
+
         gb = GridOptionsBuilder.from_dataframe(df)
         # enables pivoting on all columns, however i'd need to change ag grid to allow export of pivoted/grouped data, however it select/filters groups
         gb.configure_default_column(
@@ -404,6 +409,11 @@ elif selected == "Unlocked Mode":
             help="Tick this box to change the layout to 'wide' mode",
         )
 
+        f = [[f"{x:.2%}" for x in row] for row in df["scores"]]
+        df["classification scores"] = f
+        df.drop("scores", inplace=True, axis=1)
+        df.rename(columns={"sequence": "keyphrase"}, inplace=True)
+
         gb = GridOptionsBuilder.from_dataframe(df)
         # enables pivoting on all columns, however i'd need to change ag grid to allow export of pivoted/grouped data, however it select/filters groups
         gb.configure_default_column(
@@ -412,6 +422,8 @@ elif selected == "Unlocked Mode":
         gb.configure_selection(selection_mode="multiple", use_checkbox=True)
         gb.configure_side_bar()  # side_bar is clearly a typo :) should by sidebar
         gridOptions = gb.build()
+
+
 
         response = AgGrid(
             df,
