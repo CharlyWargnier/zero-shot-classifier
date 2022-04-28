@@ -31,16 +31,6 @@ else:
 
 st.set_page_config(layout=layout, page_title="Zero-Shot Text Classifier", page_icon="🤗")
 
-keyboard_to_url(
-    key="g",
-    url="https://github.com/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
-)
-keyboard_to_url(
-    key_code=190,
-    url="https://github.dev/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
-)
-
-load_keyboard_class()
 
 # Set up session state so app interactions don't reset the app
 
@@ -117,12 +107,6 @@ st.sidebar.markdown(
 
 # st.sidebar.write("Debug info:  \n")
 # st.sidebar.write("- Streamlit version", f"`{st.__version__}`")
-
-st.checkbox(
-    "Widen layout",
-    key="widen",
-    help="Tick this box to change the layout to 'wide' mode",
-)
 
 
 def main():
@@ -249,25 +233,11 @@ if selected == "Demo":
 
         st.markdown("## Check classifier results")
 
-        cs, c1 = st.columns([2, 2])
-
-        with cs:
-
-            @st.cache
-            def convert_df(df):
-                # IMPORTANT: Cache the conversion to prevent computation on every rerun
-                return df.to_csv().encode("utf-8")
-
-            csv = convert_df(df)  #
-
-            st.caption("")
-
-            st.download_button(
-                label="Download results as CSV",
-                data=csv,
-                file_name="results.csv",
-                mime="text/csv",
-            )
+        st.checkbox(
+            "Widen layout",
+            key="widen",
+            help="Tick this box to change the layout to 'wide' mode",
+        )
 
         gb = GridOptionsBuilder.from_dataframe(df)
         # enables pivoting on all columns, however i'd need to change ag grid to allow export of pivoted/grouped data, however it select/filters groups
@@ -284,10 +254,28 @@ if selected == "Demo":
             enable_enterprise_modules=True,
             update_mode=GridUpdateMode.MODEL_CHANGED,
             data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-            height=400,
+            height=300,
             fit_columns_on_grid_load=False,
             configure_side_bar=True,
         )
+
+        cs, c1 = st.columns([2, 2])
+
+        with cs:
+
+            @st.cache
+            def convert_df(df):
+                # IMPORTANT: Cache the conversion to prevent computation on every rerun
+                return df.to_csv().encode("utf-8")
+
+            csv = convert_df(df)  #
+
+            st.download_button(
+                label="Download results as CSV",
+                data=csv,
+                file_name="results.csv",
+                mime="text/csv",
+            )
 
 elif selected == "Unlocked Mode":
 
@@ -410,6 +398,32 @@ elif selected == "Unlocked Mode":
 
         st.markdown("## Check classifier results")
 
+        st.checkbox(
+            "Widen layout",
+            key="widen",
+            help="Tick this box to change the layout to 'wide' mode",
+        )
+
+        gb = GridOptionsBuilder.from_dataframe(df)
+        # enables pivoting on all columns, however i'd need to change ag grid to allow export of pivoted/grouped data, however it select/filters groups
+        gb.configure_default_column(
+            enablePivot=True, enableValue=True, enableRowGroup=True
+        )
+        gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+        gb.configure_side_bar()  # side_bar is clearly a typo :) should by sidebar
+        gridOptions = gb.build()
+
+        response = AgGrid(
+            df,
+            gridOptions=gridOptions,
+            enable_enterprise_modules=True,
+            update_mode=GridUpdateMode.MODEL_CHANGED,
+            data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+            height=300,
+            fit_columns_on_grid_load=False,
+            configure_side_bar=True,
+        )
+
         cs, c1 = st.columns([2, 2])
 
         with cs:
@@ -430,28 +444,20 @@ elif selected == "Unlocked Mode":
                 mime="text/csv",
             )
 
-        gb = GridOptionsBuilder.from_dataframe(df)
-        # enables pivoting on all columns, however i'd need to change ag grid to allow export of pivoted/grouped data, however it select/filters groups
-        gb.configure_default_column(
-            enablePivot=True, enableValue=True, enableRowGroup=True
-        )
-        gb.configure_selection(selection_mode="multiple", use_checkbox=True)
-        gb.configure_side_bar()  # side_bar is clearly a typo :) should by sidebar
-        gridOptions = gb.build()
-
-        response = AgGrid(
-            df,
-            gridOptions=gridOptions,
-            enable_enterprise_modules=True,
-            update_mode=GridUpdateMode.MODEL_CHANGED,
-            data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-            height=400,
-            fit_columns_on_grid_load=False,
-            configure_side_bar=True,
-        )
-
 if __name__ == "__main__":
     main()
+
+
+keyboard_to_url(
+    key="g",
+    url="https://github.com/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
+)
+keyboard_to_url(
+    key_code=190,
+    url="https://github.dev/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
+)
+
+load_keyboard_class()
 
 with st.expander("Roadmap - ToDo", expanded=False):
 
@@ -459,6 +465,7 @@ with st.expander("Roadmap - ToDo", expanded=False):
         """
 
 -   Add "ValueError" warning message when API key is not valid?
+-   Add Readme
 -   Check API cap limit for both pages
 -   Remove To-dos
 -   Remove hashed comments
