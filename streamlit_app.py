@@ -33,7 +33,7 @@ st.set_page_config(layout=layout, page_title="Zero-Shot Text Classifier", page_i
 
 #######################################################
 
-if not 'valid_inputs_received` in st.session_state:
+if not 'valid_inputs_received' in st.session_state:
     st.session_state['valid_inputs_received'] = False
 
 
