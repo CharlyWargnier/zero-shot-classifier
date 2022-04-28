@@ -225,7 +225,7 @@ if selected == "Demo":
         submit_button = st.form_submit_button(label="Submit")
 
 
-    if not submit_button and not session_state.valid_inputs_received:
+    if not submit_button and not st.session_state.valid_inputs_received:
         st.stop()
 
     elif submit_button and not multiselectComponent:
