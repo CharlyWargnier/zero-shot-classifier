@@ -36,12 +36,7 @@ st.set_page_config(layout=layout, page_title="Zero-Shot Text Classifier", page_i
 if not 'valid_inputs_received' in st.session_state:
     st.session_state['valid_inputs_received'] = False
 
-
-
-###################################
-
-
-
+#######################################################
 
 st.image(
     "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/325/balloon_1f388.png",
@@ -53,10 +48,6 @@ st.title("Zero-Shot Text Classifier")
 st.write(
     "This app allows users to classify data on the fly in an unsupervised way, via Zero-Shot Learning and the DistilBART model."
 )
-
-
-
-
 
 with st.sidebar:
     selected = option_menu(
