@@ -228,6 +228,11 @@ if selected == "Demo":
     if not submit_button and not st.session_state.valid_inputs_received:
         st.stop()
 
+    elif submit_button and not text:
+        st.warning("NO CONTENT!!!!!")
+        st.stop()
+
+
     elif submit_button and not multiselectComponent:
         st.warning("You have not added any labels, please add some! ")
         st.stop()
