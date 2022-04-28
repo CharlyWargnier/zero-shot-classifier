@@ -236,10 +236,12 @@ if selected == "Demo":
 
     elif submit_button and not multiselectComponent:
         st.warning("You have not added any labels, please add some! ")
+        st.session_state.valid_inputs_received = False
         st.stop()
 
     elif submit_button and len(multiselectComponent) == 1:
         st.warning("Please make sure to add at least two labels for classification")
+        st.session_state.valid_inputs_received = False
         st.stop()
 
     elif submit_button or st.session_state.valid_inputs_received:
