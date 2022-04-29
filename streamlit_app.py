@@ -92,7 +92,7 @@ st.sidebar.write("")
 with st.sidebar:
     selected = option_menu(
         "",
-        ["Demo", "Unlocked Mode"],
+        ["Demo (5 phrases max)", "Unlocked Mode"],
         icons=["bi-joystick", "bi-key-fill"],
         menu_icon="",
         default_index=0,
@@ -153,7 +153,7 @@ def main():
     st.caption("")
 
 
-if selected == "Demo":
+if selected == "Demo (5 phrases max)":
 
     API_KEY = st.secrets["API_KEY"]
 
@@ -168,11 +168,11 @@ if selected == "Demo":
         multiselectComponent = st_tags(
             label="",
             text="Add labels - 3 max",
-            value=["Transactional", "Informational"],
+            value=["Transactional", "Informational", "Navigational"],
             suggestions=[
-                "Navigational",
-                "Transactional",
                 "Informational",
+                "Transactional",
+                "Navigational",
                 "Positive",
                 "Negative",
                 "Neutral",
@@ -182,11 +182,11 @@ if selected == "Demo":
 
         new_line = "\n"
         nums = [
-            "I want to buy something but I don't know what",
-            "I want to order clothes from this shop",
+            "I want to buy something in this store",
             "How to ask a question about a product",
             "Request a refund through the Google Play store",
-            "I have a question for you",
+            "I have a broken screen, what should I do?",
+            "Can I have the link to the product?",
         ]
 
         sample = f"{new_line.join(map(str, nums))}"
@@ -339,11 +339,9 @@ elif selected == "Unlocked Mode":
 
     with st.form(key="my_form"):
         API_KEY2 = st.text_input(
-            "Enter your HuggingFace API key",
+            "Enter your 🤗 HuggingFace API key",
             help="Once you created you HuggiginFace account, you can get your free API token in your settings page: https://huggingface.co/settings/tokens",
         )
-
-        # API_KEY = st.secrets["API_KEY"]
 
         API_URL = (
             "https://api-inference.huggingface.co/models/valhalla/distilbart-mnli-12-3"
@@ -354,11 +352,11 @@ elif selected == "Unlocked Mode":
         multiselectComponent = st_tags(
             label="",
             text="Add labels - 3 max",
-            value=["Transactional", "Informational"],
+            value=["Transactional", "Informational", "Navigational"],
             suggestions=[
-                "Navigational",
-                "Transactional",
                 "Informational",
+                "Transactional",
+                "Navigational",
                 "Positive",
                 "Negative",
                 "Neutral",
@@ -368,11 +366,11 @@ elif selected == "Unlocked Mode":
 
         new_line = "\n"
         nums = [
-            "I want to buy something but I don't know what",
-            "I want to order clothes from this shop",
+            "I want to buy something in this store",
             "How to ask a question about a product",
             "Request a refund through the Google Play store",
-            "I have a question for you",
+            "I have a broken screen, what should I do?",
+            "Can I have the link to the product?",
         ]
 
         sample = f"{new_line.join(map(str, nums))}"
@@ -428,98 +426,106 @@ elif selected == "Unlocked Mode":
 
     elif submit_button or st.session_state.valid_inputs_received:
 
-        if submit_button:
+        try:
 
-            st.session_state.valid_inputs_received = True
+            if submit_button:
 
-        def query(payload):
-            response = requests.post(API_URL, headers=headers, json=payload)
-            # Unhash to check status codes from the API response
-            # st.write(response.status_code)
-            return response.json()
+                st.session_state.valid_inputs_received = True
 
-        listtest = ["I want a refund", "I have a question"]
-        listToAppend = []
+            def query(payload):
+                response = requests.post(API_URL, headers=headers, json=payload)
+                # Unhash to check status codes from the API response
+                # st.write(response.status_code)
+                return response.json()
 
-        for row in linesList:
-            output2 = query(
-                {
-                    "inputs": row,
-                    "parameters": {"candidate_labels": multiselectComponent},
-                    "options": {"wait_for_model": True},
-                }
-            )
+            listtest = ["I want a refund", "I have a question"]
+            listToAppend = []
 
-            listToAppend.append(output2)
+            for row in linesList:
+                output2 = query(
+                    {
+                        "inputs": row,
+                        "parameters": {"candidate_labels": multiselectComponent},
+                        "options": {"wait_for_model": True},
+                    }
+                )
 
-            df = pd.DataFrame.from_dict(output2)
+                listToAppend.append(output2)
 
-        st.success("✅ Done!")
+                df = pd.DataFrame.from_dict(output2)
 
-        df = pd.DataFrame.from_dict(listToAppend)
+            st.success("✅ Done!")
 
-        st.caption("")
-        st.markdown("### Check classifier results")
-        st.caption("")
-
-        st.checkbox(
-            "Widen layout",
-            key="widen",
-            help="Tick this box to toggle the layout to 'Wide' mode",
-        )
-
-        # This is a list comprehension to convert the decimals to percentages
-        f = [[f"{x:.2%}" for x in row] for row in df["scores"]]
-
-        # This code is for re-integrating the labels back into the dataframe
-        df["classification scores"] = f
-        df.drop("scores", inplace=True, axis=1)
-
-        # This code is to rename the columns
-        df.rename(columns={"sequence": "keyphrase"}, inplace=True)
-
-        # The code below is for Ag-grid
-        gb = GridOptionsBuilder.from_dataframe(df)
-        # enables pivoting on all columns
-        gb.configure_default_column(
-            enablePivot=True, enableValue=True, enableRowGroup=True
-        )
-        gb.configure_selection(selection_mode="multiple", use_checkbox=True)
-        gb.configure_side_bar()
-        gridOptions = gb.build()
-
-        response = AgGrid(
-            df,
-            gridOptions=gridOptions,
-            enable_enterprise_modules=True,
-            update_mode=GridUpdateMode.MODEL_CHANGED,
-            data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
-            height=300,
-            fit_columns_on_grid_load=False,
-            configure_side_bar=True,
-        )
-
-        # The code below is for the download button
-
-        cs, c1 = st.columns([2, 2])
-
-        with cs:
-
-            @st.cache
-            def convert_df(df):
-                # IMPORTANT: Cache the conversion to prevent computation on every rerun
-                return df.to_csv().encode("utf-8")
-
-            csv = convert_df(df)  #
+            df = pd.DataFrame.from_dict(listToAppend)
 
             st.caption("")
+            st.markdown("### Check classifier results")
+            st.caption("")
 
-            st.download_button(
-                label="Download results as CSV",
-                data=csv,
-                file_name="results.csv",
-                mime="text/csv",
+            st.checkbox(
+                "Widen layout",
+                key="widen",
+                help="Tick this box to toggle the layout to 'Wide' mode",
             )
+
+            # This is a list comprehension to convert the decimals to percentages
+            f = [[f"{x:.2%}" for x in row] for row in df["scores"]]
+
+            # This code is for re-integrating the labels back into the dataframe
+            df["classification scores"] = f
+            df.drop("scores", inplace=True, axis=1)
+
+            # This code is to rename the columns
+            df.rename(columns={"sequence": "keyphrase"}, inplace=True)
+
+            # The code below is for Ag-grid
+            gb = GridOptionsBuilder.from_dataframe(df)
+            # enables pivoting on all columns
+            gb.configure_default_column(
+                enablePivot=True, enableValue=True, enableRowGroup=True
+            )
+            gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+            gb.configure_side_bar()
+            gridOptions = gb.build()
+
+            response = AgGrid(
+                df,
+                gridOptions=gridOptions,
+                enable_enterprise_modules=True,
+                update_mode=GridUpdateMode.MODEL_CHANGED,
+                data_return_mode=DataReturnMode.FILTERED_AND_SORTED,
+                height=300,
+                fit_columns_on_grid_load=False,
+                configure_side_bar=True,
+            )
+
+            # The code below is for the download button
+
+            cs, c1 = st.columns([2, 2])
+
+            with cs:
+
+                @st.cache
+                def convert_df(df):
+                    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+                    return df.to_csv().encode("utf-8")
+
+                csv = convert_df(df)  #
+
+                st.caption("")
+
+                st.download_button(
+                    label="Download results as CSV",
+                    data=csv,
+                    file_name="results.csv",
+                    mime="text/csv",
+                )
+
+        except ValueError as ve:
+
+            st.warning("❄️ Add a valid HuggingFace API key in the text box above ☝️")
+            st.stop()
+
 
 if __name__ == "__main__":
     main()
