@@ -1,5 +1,9 @@
+# Import Streamlit and Pandas
 import streamlit as st
 import pandas as pd
+
+# Import for API calls
+import requests
 
 # Import for navbar
 from streamlit_option_menu import option_menu
@@ -15,52 +19,76 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import JsCode
 from st_aggrid import GridUpdateMode, DataReturnMode
 
-# Import for API calls
-import requests
-
+# Import for keyboard shortcuts
 from dashboard_utils.gui import keyboard_to_url
 from dashboard_utils.gui import load_keyboard_class
 
 #######################################################
 
-# The code below is for the layout of the page
+# The code below is to control the layout width of the app.
 if "widen" not in st.session_state:
     layout = "centered"
 else:
     layout = "wide" if st.session_state.widen else "centered"
 
+#######################################################
+
+# The code below is for the title and logo.
 st.set_page_config(layout=layout, page_title="Zero-Shot Text Classifier", page_icon="🤗")
 
+#######################################################
 
-# Set up session state so app interactions don't reset the app
+# The class below is for adding some formatting to the shortcut button on the left sidebar.
+load_keyboard_class()
 
+#######################################################
+
+# Set up session state so app interactions don't reset the app.
 if not "valid_inputs_received" in st.session_state:
     st.session_state["valid_inputs_received"] = False
 
-# st.image(
-#     "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/325/balloon_1f388.png",
-#     width=130,
-# )
+#######################################################
 
-st.image(
-    # "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/325/balloon_1f388.png",
-    "logo.png",
-    width=160,
-)
+# The block of code below is to display the title, logos and introduce the app.
+
+c1, c2 = st.columns([0.4, 2])
+
+with c1:
+
+    st.image(
+        "logo.png",
+        width=110,
+    )
+
+with c2:
+
+    st.caption("")
+    st.title("Zero-Shot Text Classifier")
+
 
 st.sidebar.image(
-    "30days_logo.jpeg",
-)
-
-st.title("Zero-Shot Text Classifier")
-
-st.write(
-    "This app allows users to classify data on the fly in an unsupervised way, via Zero-Shot Learning and the DistilBART model."
+    "30days_logo.png",
 )
 
 st.write("")
+
+st.markdown(
+    """
+
+Classify keyphrases fast and on-the-fly with this mighty app. No ML training needed!
+
+Create classifying labels (e.g. `Positive`, `Negative` and `Neutral`), paste your keyphrases, and you're off!  
+
+"""
+)
+
+st.write("")
+
 st.sidebar.write("")
 
+#######################################################
+
+# The code below is to display the menu bar.ß
 with st.sidebar:
     selected = option_menu(
         "",
@@ -70,7 +98,9 @@ with st.sidebar:
         default_index=0,
     )
 
-# st.sidebar.write("Shortcuts:")
+#######################################################
+
+# The code below is to display the shortcuts.
 st.sidebar.header("Shortcuts")
 st.sidebar.write(
     '<span class="kbdx">G</span>  &nbsp; GitHub',
@@ -82,10 +112,23 @@ st.sidebar.write(
     unsafe_allow_html=True,
 )
 
+#######################################################
+
+# The block of code below is to display information about Streamlit.
+
 st.sidebar.markdown("---")
 
 # Sidebar
 st.sidebar.header("About")
+
+st.sidebar.markdown(
+    """
+
+App created by [Datachaz](https://twitter.com/DataChaz) using 🎈[Streamlit](https://streamlit.io/) and [HuggingFace](https://huggingface.co/inference-api)'s [Distilbart-mnli-12-3](https://huggingface.co/valhalla/distilbart-mnli-12-3) model.
+
+"""
+)
+
 st.sidebar.markdown(
     "[Streamlit](https://streamlit.io) is a Python library that allows the creation of interactive, data-driven web applications in Python."
 )
@@ -104,9 +147,6 @@ st.sidebar.header("Deploy")
 st.sidebar.markdown(
     "You can quickly deploy Streamlit apps using [Streamlit Cloud](https://streamlit.io/cloud) in just a few clicks."
 )
-
-# st.sidebar.write("Debug info:  \n")
-# st.sidebar.write("- Streamlit version", f"`{st.__version__}`")
 
 
 def main():
@@ -155,7 +195,7 @@ if selected == "Demo":
 
         MAX_LINES = 5
         text = st.text_area(
-            "Enter keyphrase to classify",
+            "Enter keyphrases to classify",
             sample,
             height=200,
             key="2",
@@ -231,26 +271,37 @@ if selected == "Demo":
 
         df = pd.DataFrame.from_dict(listToAppend)
 
-        st.markdown("## Check classifier results")
+        st.caption("")
+        st.markdown("### Check classifier results")
+        st.caption("")
 
         st.checkbox(
             "Widen layout",
             key="widen",
-            help="Tick this box to change the layout to 'wide' mode",
+            help="Tick this box to toggle the layout to 'Wide' mode",
         )
 
+        st.caption("")
+
+        # This is a list comprehension to convert the decimals to percentages
         f = [[f"{x:.2%}" for x in row] for row in df["scores"]]
+
+        # This code is for re-integrating the labels back into the dataframe
         df["classification scores"] = f
         df.drop("scores", inplace=True, axis=1)
+
+        # This code is to rename the columns
         df.rename(columns={"sequence": "keyphrase"}, inplace=True)
 
+        # The code below is for Ag-grid
+
         gb = GridOptionsBuilder.from_dataframe(df)
-        # enables pivoting on all columns, however i'd need to change ag grid to allow export of pivoted/grouped data, however it select/filters groups
+        # enables pivoting on all columns
         gb.configure_default_column(
             enablePivot=True, enableValue=True, enableRowGroup=True
         )
         gb.configure_selection(selection_mode="multiple", use_checkbox=True)
-        gb.configure_side_bar()  # side_bar is clearly a typo :) should by sidebar
+        gb.configure_side_bar()
         gridOptions = gb.build()
 
         response = AgGrid(
@@ -263,6 +314,8 @@ if selected == "Demo":
             fit_columns_on_grid_load=False,
             configure_side_bar=True,
         )
+
+        # The code below is for the download button
 
         cs, c1 = st.columns([2, 2])
 
@@ -285,7 +338,11 @@ if selected == "Demo":
 elif selected == "Unlocked Mode":
 
     with st.form(key="my_form"):
-        API_KEY2 = st.text_input("Enter API key")
+        API_KEY2 = st.text_input(
+            "Enter your HuggingFace API key",
+            help="Once you created you HuggiginFace account, you can get your free API token in your settings page: https://huggingface.co/settings/tokens",
+        )
+
         # API_KEY = st.secrets["API_KEY"]
 
         API_URL = (
@@ -324,7 +381,7 @@ elif selected == "Unlocked Mode":
 
         MAX_LINES_FULL = 50
         text = st.text_area(
-            "Enter keyphrase to classify",
+            "Enter keyphrases to classify",
             sample,
             height=200,
             key="2",
@@ -337,14 +394,14 @@ elif selected == "Unlocked Mode":
         linesList = []
         for x in lines:
             linesList.append(x)
-        linesList = list(dict.fromkeys(linesList))  # Remove dupes
-        linesList = list(filter(None, linesList))  # Remove empty
+        linesList = list(dict.fromkeys(linesList))  # Remove dupes from list
+        linesList = list(filter(None, linesList))  # Remove empty lines from list
 
         if len(linesList) > MAX_LINES_FULL:
             st.info(
-                f"❄️ Only the first "
+                f"❄️ Note that only the first "
                 + str(MAX_LINES_FULL)
-                + " keyprases are reviewed. Tweak 'MAX_LINES_FULL' in the code to change this"
+                + " keyprases will be reviewed to preserve performance. Fork the repo and tweak 'MAX_LINES_FULL' in the code to increase that limit."
             )
 
             linesList = linesList[:MAX_LINES_FULL]
@@ -401,29 +458,35 @@ elif selected == "Unlocked Mode":
 
         df = pd.DataFrame.from_dict(listToAppend)
 
-        st.markdown("## Check classifier results")
+        st.caption("")
+        st.markdown("### Check classifier results")
+        st.caption("")
 
         st.checkbox(
             "Widen layout",
             key="widen",
-            help="Tick this box to change the layout to 'wide' mode",
+            help="Tick this box to toggle the layout to 'Wide' mode",
         )
 
+        # This is a list comprehension to convert the decimals to percentages
         f = [[f"{x:.2%}" for x in row] for row in df["scores"]]
+
+        # This code is for re-integrating the labels back into the dataframe
         df["classification scores"] = f
         df.drop("scores", inplace=True, axis=1)
+
+        # This code is to rename the columns
         df.rename(columns={"sequence": "keyphrase"}, inplace=True)
 
+        # The code below is for Ag-grid
         gb = GridOptionsBuilder.from_dataframe(df)
-        # enables pivoting on all columns, however i'd need to change ag grid to allow export of pivoted/grouped data, however it select/filters groups
+        # enables pivoting on all columns
         gb.configure_default_column(
             enablePivot=True, enableValue=True, enableRowGroup=True
         )
         gb.configure_selection(selection_mode="multiple", use_checkbox=True)
-        gb.configure_side_bar()  # side_bar is clearly a typo :) should by sidebar
+        gb.configure_side_bar()
         gridOptions = gb.build()
-
-
 
         response = AgGrid(
             df,
@@ -435,6 +498,8 @@ elif selected == "Unlocked Mode":
             fit_columns_on_grid_load=False,
             configure_side_bar=True,
         )
+
+        # The code below is for the download button
 
         cs, c1 = st.columns([2, 2])
 
@@ -459,7 +524,6 @@ elif selected == "Unlocked Mode":
 if __name__ == "__main__":
     main()
 
-
 keyboard_to_url(
     key="g",
     url="https://github.com/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
@@ -468,68 +532,3 @@ keyboard_to_url(
     key_code=190,
     url="https://github.dev/CharlyWargnier/zero-shot-classifier/blob/main/streamlit_app.py",
 )
-
-load_keyboard_class()
-
-with st.expander("Roadmap - ToDo", expanded=False):
-
-    st.write(
-        """
-
--   Add "ValueError" warning message when API key is not valid?
--   Add Readme
--   Check API cap limit for both pages
--   Remove To-dos
--   Remove hashed comments
--   Add markdown link in top paragraph
--   Add notes about datachaz
-
- 	    """
-    )
-    st.markdown("")
-
-with st.expander("Roadmap - Discard?", expanded=False):
-
-    st.write(
-        """
-
--   Add help tooltip for Enter API key
--   Change message in show_spinner show_spinner
--   Add a message when the model is being trained (it will take a minute)
--   Reduce font size in navbar
-
- 	    """
-    )
-    st.markdown("")
-
-with st.expander("Roadmap - Done", expanded=False):
-    st.write(
-        """
-
--   Remove space in top header
--   Add Markdown line in the sidebar
--   Change logo
--   Add content from 30days of streamlit from corp repo
--   Add link to 30days
--   [P1] Add session state to the unlocked mode
--   Add a variable for cap limit
--   [P2] Add link to blog post
--   Retry API key once Hugging Face has fixed the issue.
--   Add session state to allow for interactivity with the table
--   Add warning message when no labels are inputed
--   Change keyphrases as they are not great
--   P1 - Mode code in "demo" to "full mode"
--   Remove hashed comment
--   Change lenthg limit on full mode to 50
--   P1 - Make sure it's deploying fine!
--   Change icons in sidebar menu
--   Move keyboards shortcuts class to a separate file
--   Change MAX_LINES in API key section (atm fixed at 10)
--   P1 - Fix "ValueError: If using all scalar values, you must pass an index"
--   Change github.dev links to the correct repo
--   SessionState tab 1 demo
--   SessionState tab 2 own API key
-	    """
-    )
-
-    st.markdown("")
