@@ -1,6 +1,6 @@
 # 
 
-# 🤗 Zero-shot text classifier
+# 🤗 Zero-shot Text Classifier
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/charlywargnier/zero-shot-classifier/main)
 
