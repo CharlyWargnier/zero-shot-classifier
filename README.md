@@ -1,10 +1,17 @@
-# 
 
 # 🤗 Zero-shot Text Classifier
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/charlywargnier/zero-shot-classifier/main)
 
-Classify keyphrases fast and on-the-fly with this mighty app. No ML training needed! Create classifying labels (e.g. `Positive`, `Negative` and `Neutral`), paste your keyphrases, and you're off! 🚀
+Classify keyphrases fast and on-the-fly with this mighty app. No ML training needed! Create classifying labels, paste your keyphrases, and you're off! 🚀
+
+You can set these labels anything, e.g.:
+- `Positive`, `Negative` and `Neutral` for sentiment analysis
+- `Angry`, `Happy`, `Emotional` for emotion analysis
+- `Navigational`, `Transactional`, Informational for intent classification purposes
+- Your product range (`Bags`, `Shoes`, `Boots` etc.)
+
+You decide! 
 
 ### About the app
 
